@@ -9,23 +9,23 @@ const apiService = new AffordApiService(logger);
 async function main() {
     try {
         await logger.authenticate();
-        await logger.Log("backend", "info", "service", "Initializing Vehicle Maintenance Scheduler job.");
+        await logger.Log("backend", "info", "service", "Starting vehicle scheduler run."); 
 
         const depots = await apiService.getDepots();
         const vehicles = await apiService.getVehicles();
 
         const totalBudgetHours = depots.reduce((acc, depot) => acc + depot.MechanicHours, 0);
-        await logger.Log("backend", "info", "service", `Aggregate mechanic budget calculated: ${totalBudgetHours} hours across ${depots.length} depots.`);
+        await logger.Log("backend", "info", "service", `Budget: ${totalBudgetHours} hrs, ${depots.length} depots.`);
 
         if (totalBudgetHours === 0 || vehicles.length === 0) {
             console.warn("Insufficient data to run optimization engine.");
             return;
         }
 
-        await logger.Log("backend", "info", "service", "Starting dynamic programming optimization sequence...");
+        await logger.Log("backend", "info", "service", "Running DP optimization sequence.");
         const result = calculateOptimalTasks(vehicles, totalBudgetHours);
 
-        await logger.Log("backend", "info", "service", `Optimization complete. Impact Yield: ${result.maxImpact}. Selected ${result.selectedTaskIds.length} tasks.`);
+        await logger.Log("backend", "info", "service", `Done. Yield: ${result.maxImpact}, Tasks: ${result.selectedTaskIds.length}`); 
 
         console.log("\n==================================================");
         console.log("           SCHEDULER EXECUTION SUMMARY            ");
@@ -39,7 +39,7 @@ async function main() {
         console.log("==================================================\n");
 
     } catch (error) {
-        await logger.Log("backend", "error", "service", `Fatal execution error: ${error.message}`);
+        await logger.Log("backend", "error", "service", "Fatal execution error occurred."); 
         console.error("Scheduler process crashed:", error);
         process.exit(1);
     }
